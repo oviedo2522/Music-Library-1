@@ -7,20 +7,26 @@ function App() {
   const [message, setMessage] = useState('Search for Music!')
   const [data, setData] = useState([])
 
-  const API_URL = 'https://itunes.apple.com/search?term='
-
   useEffect(() => {
-    if (search) {
-      const fetchData = async () => {
+    const fetchData = async () => {
+      try {
         document.title = `${search} Music`
-        const response = await fetch(API_URL + search)
+        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(search)}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const resData = await response.json()
         if (resData.results.length > 0) {
           setData(resData.results)
         } else {
           setMessage('Not Found')
         }
+      } catch (error) {
+        console.error("Fetch error: ", error);
+        setMessage('Failed to fetch data')
       }
+    }
+    if (search) {
       fetchData()
     }
   }, [search])
@@ -32,7 +38,7 @@ function App() {
 
   return (
     <div style={{ 'display': 'flex', 'flexFlow': 'column', 'justifyContent': 'center', 'alignItems': 'center' }}>
-      <SearchBar />
+      <SearchBar handleSearch={handleSearch} />
       {message}
       <Gallery data={data} />
     </div>
