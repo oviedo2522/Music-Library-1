@@ -1,52 +1,48 @@
-import { useEffect, useState } from 'react'
-import Gallery from './Gallery'
+import { useState, useRef } from 'react'
+import Gallery from './components/Gallery'
 import SearchBar from './components/SearchBar'
 import { DataContext } from './context/DataContext'
-
+import { SearchContext } from './context/SearchContext'
 
 function App() {
-  const [search, setSearch] = useState('')
-  const [message, setMessage] = useState('Search for Music!')
-  const [data, setData] = useState([])
+    const [message, setMessage] = useState('Search for Music!')
+    const [data, setData] = useState([])
+    const searchInput = useRef('')
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        document.title = `${search} Music`
-        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(search)}`)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+    const API_URL = 'https://itunes.apple.com/search?term='
+    
+    const handleSearch = (e, term) => {
+        e.preventDefault()
+        // Fetch Data
+        const fetchData = async () => {
+            document.title = `${term} Music`
+            const response = await fetch(API_URL + term)
+            const resData = await response.json()
+            if (resData.results.length > 0) {
+                // Set State and Context value
+                return setData(resData.results)
+            } else {
+                return setMessage('Not Found')
+            }
         }
-        const resData = await response.json()
-        if (resData.results.length > 0) {
-          setData(resData.results)
-        } else {
-          setMessage('Not Found')
-        }
-      } catch (error) {
-        console.error("Fetch error: ", error);
-        setMessage('Failed to fetch data')
-      }
+        fetchData()
     }
-    if (search) {
-      fetchData()
-    }
-  }, [search])
-
-  const handleSearch = (e, term) => {
-    e.preventDefault()
-    setSearch(term)
-  }
-
-  return (
-    <div style={{ 'display': 'flex', 'flexFlow': 'column', 'justifyContent': 'center', 'alignItems': 'center' }}>
-      <SearchBar handleSearch={handleSearch} />
-      {message}
-      <DataContext.Provider value={data} >
-         <Gallery />
-      </DataContext.Provider>
-    </div>
-  )
+    
+    return (
+        <div className="App">
+            <SearchContext.Provider value={{
+                term: searchInput,
+                handleSearch: handleSearch
+                }}>
+                <SearchBar />
+            </SearchContext.Provider>
+            {message}
+            <DataContext.Provider value={data}>
+                <Gallery />
+            </DataContext.Provider>
+        </div>
+    );
 }
 
 export default App;
+
