@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import Gallery from './Gallery'
+import Gallery from './components/Gallery'
 import SearchBar from './components/SearchBar'
-import { DataContext } from './context/DataContext'
+
 
 
 function App() {
@@ -42,9 +42,7 @@ function App() {
     <div style={{ 'display': 'flex', 'flexFlow': 'column', 'justifyContent': 'center', 'alignItems': 'center' }}>
       <SearchBar handleSearch={handleSearch} />
       {message}
-      <DataContext.Provider value={data} >
-         <Gallery />
-      </DataContext.Provider>
+     <Gallery data={data}/>
     </div>
   )
 }
